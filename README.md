@@ -2,13 +2,12 @@
 
 Deep learning application for classifying cardiac conditions from ECG signals using Parallel xLSTM architecture.
 
-## 🎯 Quick Start
+##  Quick Start
 
 ### Run Locally
 ```bash
 streamlit run app.py
 ```
-Visit: http://localhost:8501
 
 ### Deploy to Cloud
 See `START_HERE.md` for step-by-step guide
@@ -17,7 +16,6 @@ See `START_HERE.md` for step-by-step guide
 
 - 🫀 Classifies 5 cardiac conditions
 - 📁 Supports .npy, .csv, and WFDB formats
-- 💻 CPU-only inference (no GPU needed)
 - 🎨 Interactive web interface
 - 📈 Real-time probability visualization
 
@@ -45,7 +43,7 @@ pip install -r requirements.txt
 ## 🎮 Usage
 
 1. Upload ECG signal file
-2. Enter patient metadata (age, sex)
+2. Enter patient metadata (age, sex {0: Male, 1: Female}) 
 3. View predictions and probabilities
 
 ## 📁 Project Structure
@@ -60,22 +58,9 @@ pip install -r requirements.txt
 └── normalization_params.npz         # Normalization params
 ```
 
-## 🚀 Deployment
-
-Full deployment guide available in `DEPLOYMENT_GUIDE.md`
-
-Quick deploy:
-1. Run `setup_github.bat`
-2. Deploy to Streamlit Cloud
-3. Share your app!
-
-## 📄 License
-
-MIT License
-
 ## 👤 Author
 
-Your Name - 2025
+Mohamed Ahmed AL Mansoury - 2025
 
 ## 🙏 Acknowledgments
 
