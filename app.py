@@ -11,6 +11,8 @@ import wfdb
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from model_inference import load_model_from_checkpoint
 from utils import preprocess_input, load_normalization_params
@@ -58,11 +60,80 @@ def load_norm_params(params_path):
         st.warning(f"Error loading normalization params: {e}. Using raw signal.")
         return None, None
 
+def plot_ecg_interactive(signal, title="ECG Signal Visualization"):
+    lead_names = ['I', 'II', 'III', 'aVR', 'aVL', 'aVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6']
+    
+    fig = make_subplots(
+        rows=4, cols=3,
+        subplot_titles=lead_names,
+        vertical_spacing=0.08,
+        horizontal_spacing=0.08
+    )
+    
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b',
+              '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#ff9896', '#aec7e8']
+    
+    for i in range(12):
+        row = i // 3 + 1
+        col = i % 3 + 1
+        
+        fig.add_trace(
+            go.Scatter(
+                y=signal[:, i],
+                mode='lines',
+                line=dict(color=colors[i], width=1),
+                name=lead_names[i],
+                showlegend=False
+            ),
+            row=row, col=col
+        )
+        
+        fig.update_xaxes(title_text="Time", row=row, col=col, showgrid=True, gridcolor='lightgray')
+        fig.update_yaxes(title_text="mV", row=row, col=col, showgrid=True, gridcolor='lightgray')
+    
+    fig.update_layout(
+        height=900,
+        title_text=title,
+        title_font_size=20,
+        showlegend=False,
+        plot_bgcolor='white'
+    )
+    
+    return fig
+
+def plot_lead_grid(signal):
+    lead_names = ['I', 'II', 'III', 'aVR', 'aVL', 'aVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6']
+    
+    fig, axes = plt.subplots(4, 3, figsize=(15, 12))
+    fig.suptitle('12-Lead ECG', fontsize=16, fontweight='bold')
+    
+    for i in range(12):
+        row = i // 3
+        col = i % 3
+        ax = axes[row, col]
+        
+        ax.plot(signal[:, i], linewidth=0.8, color='darkblue')
+        ax.set_title(lead_names[i], fontweight='bold', fontsize=10)
+        ax.grid(True, alpha=0.3)
+        ax.set_xlabel('Sample', fontsize=8)
+        ax.set_ylabel('Amplitude (mV)', fontsize=8)
+        ax.tick_params(labelsize=7)
+    
+    plt.tight_layout()
+    return fig
+
+CLASS_DESCRIPTIONS = {
+    'NORM': 'Normal ECG - No cardiac abnormalities detected. The heart rhythm and electrical activity are within normal parameters.',
+    'MI': 'Myocardial Infarction - Heart attack detected. This indicates blockage of blood flow to the heart muscle, requiring immediate medical attention.',
+    'STTC': 'ST-T Change - Abnormal ST segment and T wave changes detected. May indicate ischemia, electrolyte imbalance, or other cardiac conditions.',
+    'CD': 'Conduction Disturbance - Abnormal electrical conduction detected. This includes bundle branch blocks and other conduction delays.',
+    'HYP': 'Hypertrophy - Thickening of the heart muscle detected. This may indicate long-term high blood pressure or valve problems.'
+}
+
 def main():
     st.title("ECG Classification with Parallel xLSTM")
     st.write("Upload an ECG data file to classify.")
 
-    # Sidebar for Metadata
     st.sidebar.header("Patient Metadata")
     age = st.sidebar.number_input("Age", min_value=0, max_value=120, value=60)
     sex = st.sidebar.selectbox("Sex", ["Male", "Female"])
@@ -112,7 +183,7 @@ def main():
                     st.success(f"Successfully loaded WFDB record: {record_name}")
                 
                 if signal is not None:
-                    st.success(f"✓ File loaded successfully!")
+                    st.success(f"File loaded successfully!")
                     st.write(f"Signal shape: {signal.shape}")
                     
                     if not isinstance(signal, np.ndarray):
@@ -182,31 +253,48 @@ def main():
                             probs = output.cpu().numpy()[0]
                         
                         st.markdown("---")
-                        st.markdown("## 🎯 Prediction Results")
+                        st.markdown("## Prediction Results")
                         
                         max_idx = np.argmax(probs)
                         max_prob = probs[max_idx]
                         predicted_class = CLASS_NAMES[max_idx]
                         
-                        col1, col2, col3 = st.columns([1, 2, 1])
-                        with col2:
-                            st.markdown(f"""
-                            <div style='text-align: center; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin: 20px 0;'>
-                                <h2 style='color: white; margin: 0; font-size: 2.5em;'>{predicted_class}</h2>
-                                <p style='color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.3em;'>Confidence: {max_prob*100:.1f}%</p>
-                            </div>
-                            """, unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div style='text-align: center; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin: 20px 0;'>
+                            <h2 style='color: white; margin: 0; font-size: 2.5em;'>{predicted_class}</h2>
+                            <p style='color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.3em;'>Confidence: {max_prob*100:.1f}%</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                         
-                        st.markdown("### 📊 All Class Probabilities")
+                        st.markdown("#### Description")
+                        st.info(CLASS_DESCRIPTIONS[predicted_class])
                         
-                        colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe']
-                        for i, (class_name, prob) in enumerate(zip(CLASS_NAMES, probs)):
-                            col1, col2 = st.columns([1, 3])
-                            with col1:
-                                st.markdown(f"**{class_name}**")
-                            with col2:
-                                st.progress(float(prob))
-                                st.caption(f"{prob*100:.2f}%")
+                        st.markdown("### All Class Probabilities")
+                        
+                        fig_all = go.Figure(data=[go.Pie(
+                            labels=CLASS_NAMES,
+                            values=probs,
+                            hole=0.4,
+                            marker=dict(colors=['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe']),
+                            text=[f'{p:.4f}' for p in probs],
+                            textinfo='label+text',
+                            textfont_size=14,
+                            hovertemplate='<b>%{label}</b><br>Probability: %{value:.4f}<br>Percentage: %{percent}<extra></extra>'
+                        )])
+                        
+                        fig_all.update_layout(
+                            height=500,
+                            showlegend=True,
+                            legend=dict(
+                                orientation="v",
+                                yanchor="middle",
+                                y=0.5,
+                                xanchor="left",
+                                x=1.05
+                            )
+                        )
+                        
+                        st.plotly_chart(fig_all, use_container_width=True)
                         
             except Exception as e:
                 st.error(f"Error processing file: {e}")
