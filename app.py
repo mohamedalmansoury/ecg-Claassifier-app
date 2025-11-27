@@ -181,20 +181,32 @@ def main():
                             output = model(X, M)
                             probs = output.cpu().numpy()[0]
                         
-                        st.subheader("Prediction Results")
+                        st.markdown("---")
+                        st.markdown("## 🎯 Prediction Results")
                         
-                        st.write("### Classification Probabilities")
-                        for class_name, prob in zip(CLASS_NAMES, probs):
-                            st.metric(label=class_name, value=f"{prob:.4f}")
-                            st.progress(float(prob))
+                        max_idx = np.argmax(probs)
+                        max_prob = probs[max_idx]
+                        predicted_class = CLASS_NAMES[max_idx]
                         
-                        import matplotlib.pyplot as plt
-                        fig, ax = plt.subplots(figsize=(10, 6))
-                        ax.barh(CLASS_NAMES, probs, color='steelblue')
-                        ax.set_xlabel('Probability')
-                        ax.set_xlim(0, 1)
-                        ax.grid(axis='x', alpha=0.3)
-                        st.pyplot(fig)
+                        col1, col2, col3 = st.columns([1, 2, 1])
+                        with col2:
+                            st.markdown(f"""
+                            <div style='text-align: center; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin: 20px 0;'>
+                                <h2 style='color: white; margin: 0; font-size: 2.5em;'>{predicted_class}</h2>
+                                <p style='color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.3em;'>Confidence: {max_prob*100:.1f}%</p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        st.markdown("### 📊 All Class Probabilities")
+                        
+                        colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe']
+                        for i, (class_name, prob) in enumerate(zip(CLASS_NAMES, probs)):
+                            col1, col2 = st.columns([1, 3])
+                            with col1:
+                                st.markdown(f"**{class_name}**")
+                            with col2:
+                                st.progress(float(prob))
+                                st.caption(f"{prob*100:.2f}%")
                         
             except Exception as e:
                 st.error(f"Error processing file: {e}")
