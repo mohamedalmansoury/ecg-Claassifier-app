@@ -26,11 +26,11 @@ git commit -m "Initial commit: ECG classifier deployment"
 
 echo.
 echo [4/6] Using your GitHub repository:
-echo    https://github.com/mohamedalmansoury/ecg-Claassifier-app.git
+echo    https://github.com/mohamedalmansoury/New_ecg_classiification.git
 echo.
 
 echo [5/6] Adding remote and pushing to GitHub...
-git remote add origin https://github.com/mohamedalmansoury/ecg-Claassifier-app.git
+git remote add origin https://github.com/mohamedalmansoury/New_ecg_classiification.git
 git branch -M main
 
 echo.
@@ -47,12 +47,12 @@ if %ERRORLEVEL% EQU 0 (
     echo 1. Go to https://share.streamlit.io/
     echo 2. Sign in with GitHub
     echo 3. Click "New app"
-    echo 4. Select: mohamedalmansoury/ecg-Claassifier-app
+    echo 4. Select: mohamedalmansoury/New_ecg_classiification
     echo 5. Main file: app.py
     echo 6. Click "Deploy"
     echo.
     echo Your app will be at:
-    echo https://mohamedalmansoury-ecg-claassifier-app-app-xyz.streamlit.app
+    echo https://mohamedalmansoury-new-ecg-classiification-app-xyz.streamlit.app
     echo.
 ) else (
     echo.
