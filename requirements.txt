@@ -5,3 +5,4 @@ scipy>=1.10.0
 wfdb>=4.1.0
 xlstm>=1.0.0
 matplotlib>=3.7.0
+plotly>=5.18.0
