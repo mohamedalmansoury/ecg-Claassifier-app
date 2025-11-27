@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Sample/test data
+sample_ecg.npy
+sample_ecg.csv
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Model checkpoints (if not using Git LFS)
+# Uncomment if storing models externally
+# *.ckpt
+# *.npz
+# *.pth
+# *.pt
